@@ -95,8 +95,9 @@ llm = LLM(
 
 sampling_params = SamplingParams(
     max_tokens=MAX_TOKENS,
-    temperature=0.6,
-    top_p=0.95,
+    n=5, # changed from 1
+    temperature=0.7, # changed from 0.6
+    top_p=0.9, # changed from 0.95
     top_k=20,
     min_p=0.0,
     presence_penalty=0.0,
