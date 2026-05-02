@@ -17,7 +17,7 @@ MODEL_ID    = "Qwen/Qwen3-4B-Thinking-2507"
 GPU_ID      = "0"                    # CUDA_VISIBLE_DEVICES
 DATA_PATH   = "data/public.jsonl"
 OUTPUT_PATH = "results/exp1_results.jsonl"
-MAX_TOKENS  = 16384
+MAX_TOKENS  = 32768
 
 os.environ["CUDA_VISIBLE_DEVICES"] = GPU_ID
 os.environ["VLLM_LOGGING_LEVEL"] = "DEBUG"
