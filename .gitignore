@@ -4,3 +4,13 @@ results
 data
 __pycache__
 LICENSE
+# model outputs / checkpoints
+outputs/
+qwen3-4b-math-lora/
+*.safetensors
+*.pt
+checkpoint-*/
+
+# Jupyter auto checkpoints
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
