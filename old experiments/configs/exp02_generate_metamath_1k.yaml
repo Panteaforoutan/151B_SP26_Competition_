@@ -1,0 +1,56 @@
+experiment_name: exp02_generate_metamath_1k_public
+
+model_id: Qwen/Qwen3-4B-Thinking-2507
+
+eval_path: data/public.jsonl
+adapter_dir: outputs/exp02_train_metamath_10k/adapter
+
+output_path: outputs/exp02_generate_metamath_10k_public/results_public.jsonl
+metrics_path: outputs/exp02_generate_metamath_10k_public/metrics.json
+
+save_eval: true
+
+max_lora_rank: 16
+dtype: bfloat16
+max_model_len: 8192
+gpu_memory_utilization: 0.80
+enforce_eager: true
+max_num_seqs: 1
+max_num_batched_tokens: 2048
+
+temperature: 0.6
+top_p: 0.95
+top_k: 20
+max_tokens: 512
+prompts:
+  math: |
+    You are an expert mathematician. Think carefully before answering each question.
+    Put your final answer inside \boxed{}.
+
+    Example:
+    Question: What is 20% of 100?
+    Solution: 20% of 100 = 0.20 × 100 = 20.
+    Final Answer: \boxed{20}
+
+    Now solve the following problem.
+    If the problem has multiple sub-answers, separate them by commas inside a single \boxed{}, e.g. \boxed{3, 7}.
+
+  mcq: |
+    You are an expert mathematician.
+    Read the problem carefully and read all answer choices.
+    Break the problem into clear steps and double-check your work.
+    Reason through the answer choices and eliminate wrong choices.
+    Then choose the single best answer.
+
+    Example:
+    Question: What is 10 + 17?
+    A. 37
+    B. 10
+    C. 17
+    D. 27
+
+    Solution: 10 + 17 = 27, so the answer is option D.
+    Final Answer: \boxed{D}
+
+    Now solve the following problem.
+    Output ONLY the letter of your chosen option inside \boxed{}, e.g. \boxed{C}.

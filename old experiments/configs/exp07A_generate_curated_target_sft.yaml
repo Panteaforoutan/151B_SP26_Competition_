@@ -1,0 +1,86 @@
+experiment_name: exp07A_generate_curated_target_sft
+
+model_id: Qwen/Qwen3-4B-Thinking-2507
+
+eval_path: data/public.jsonl
+
+adapter_dir: /home/pforoutan/private/151B_SP26_Competition/outputs/exp07_curated_target_sft_20k/adapter
+output_path: /home/pforoutan/private/151B_SP26_Competition/outputs/exp07A_generate_curated_target_sft/results_public.jsonl
+metrics_path: /home/pforoutan/private/151B_SP26_Competition/outputs/exp07A_generate_curated_target_sft/metrics.json
+results_path: /home/pforoutan/private/151B_SP26_Competition/outputs/exp07A_generate_curated_target_sft/eval_results.jsonl
+final_csv: /home/pforoutan/private/151B_SP26_Competition/outputs/exp07A_generate_curated_target_sft/submission.csv
+
+batch_size: 10
+is_submission: false
+eval_subset_size: 300
+eval_subset_seed: 42
+
+save_eval: true
+
+max_lora_rank: 16
+dtype: bfloat16
+max_model_len: 8196
+gpu_memory_utilization: 0.80
+enforce_eager: true
+max_num_seqs: 1
+max_num_batched_tokens: 2048
+
+repetition_penalty: 1.06
+temperature: 0
+top_p: 1
+top_k: 20
+max_tokens: 2048
+mcq_max_tokens : 1024
+free_form_max_tokens : 4096
+
+prompts:
+  math: |
+    You are an expert mathematician. Think carefully before answering each question.
+    Put your final answer inside \boxed{}.
+    
+    If the answer has multiple parts:
+    - Put all parts in one final box.
+    - Use the exact requested order.
+    - Separate answers with commas.
+    - Do not omit blanks or repeated parts.
+    
+    Example 1:
+    Question: What is 20% of 100?
+    Solution: 20% of 100 = 0.20 × 100 = 20.
+    Final Answer: \boxed{20}
+    
+    Example 2:
+    Question: Fill in the blanks: The solutions to x^2 - 5x + 6 = 0 are __ and __, in increasing order.
+    Solution: Factoring gives x^2 - 5x + 6 = (x - 2)(x - 3), so the solutions are 2 and 3.
+    Final Answer: \boxed{2, 3}
+
+    Now solve the following problem.
+
+  mcq: |
+    You are an expert mathematician.
+    Read the problem carefully and read all answer choices.
+    Break the problem into clear steps and double-check your work.
+    Reason through the answer choices and eliminate wrong choices.
+    Then choose the single best answer.
+    
+    Example:
+    Question: What is 10 + 17?
+    A. 37
+    B. 10
+    C. 17
+    D. 27
+    
+    Solution: 10 + 17 = 27, so the answer is option D.
+    Final Answer: \boxed{D}
+    
+    For the final answer:
+    - You must choose exactly one option.
+    - Put only the letter inside \boxed{}.
+    - Do not put the option text inside the box.
+    - End your response with exactly one of:
+      \boxed{A}
+      \boxed{B}
+      \boxed{C}
+      \boxed{D}
+    
+    Now solve the following problem.
