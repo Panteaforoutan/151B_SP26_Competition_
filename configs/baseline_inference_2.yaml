@@ -24,7 +24,7 @@ save_eval: true
 
 
 dtype: bfloat16
-max_model_len: 4096
+max_model_len: 8196
 gpu_memory_utilization: 0.80
 enforce_eager: true
 max_num_seqs: 1

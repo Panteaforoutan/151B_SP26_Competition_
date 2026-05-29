@@ -1,0 +1,95 @@
+experiment_name: baseline_inference_3
+
+model_id: Qwen/Qwen3-4B-Thinking-2507
+
+eval_path: data/public.jsonl
+
+use_lora: false
+max_lora_rank: 16
+adapter_dir: outputs/.../...
+
+output_path: outputs/baseline_inference_3.jsonl
+
+metrics_path: outputs/baseline_inference/baseline_inference_3_metrics.jsonl
+results_path: outputs/baseline_inference/baseline_inference_3_results.jsonl
+
+is_submission: false
+final_csv: outputs/.../...
+
+batch_size: 10
+
+eval_subset_size: 
+eval_subset_seed: 42
+save_eval: true
+
+
+dtype: bfloat16
+max_model_len: 4096
+gpu_memory_utilization: 0.80
+enforce_eager: true
+max_num_seqs: 1
+max_num_batched_tokens: 2048
+
+temperature: 0
+top_p: 1
+top_k: -1
+max_tokens : 16384
+mcq_max_tokens : 16384
+free_form_max_tokens : 16384 
+
+prompts:
+  math: |
+    You are an expert mathematician. Think carefully before answering each question.
+    Reason through the problem once, directly. Do not re-check or restart your calculation. If you catch an error, correct it inline and continue.
+    Do not use "But wait" or restart reasoning after reaching a conclusion. If you have reached an answer, write \boxed{} and stop.
+    Verify each step as you go. Once you reach your final answer, write \boxed{} immediately and stop — do not re-derive or re-check after boxing your answer.
+    Do not rewrite or reformat your solution after reasoning through it. Your reasoning IS your solution — write \boxed{} as soon as you have the answer and stop. Do not produce a separate "clean" write-up.
+    Follow these rules mechanically. Do not reason about them, debate them, or second-guess the precision of conversion constants. Just apply them.
+
+    RULES:
+    1. You MUST always end your response with your final answer in \boxed{} — even if your reasoning is incomplete, never stop before writing the boxed answer.
+    2. If the problem has multiple parts or sub-answers, include ALL answers inside a single \boxed{} separated by commas in order, e.g. \boxed{3, 7}. Do not omit any part.
+    3. For decimal answers: keep at least 6 digits after the decimal point. Never round to 2 decimal places. E.g. write 62.777778 not 62.78.
+    4. Unless the problem explicitly asks for an exact form, evaluate to a decimal with at least 6 digits after the decimal point. E.g. write 14.584346 not \frac{504}{11\pi}.
+    5. For expressions with Euler's number, write \exp(...) or use e^{...} with explicit multiplication, e.g. 6 \cdot e^{16x} not 6e^{16x}.
+    6. Always write a leading zero before decimals less than 1, e.g. 0.34 not .34.
+    7. For yes/no or reject/do-not-reject answers, write in ALL CAPS: YES, NO, REJECT, DO NOT REJECT.
+
+    Example:
+    Question: What is 20% of 100?
+    Solution: 20% of 100 = 0.20 × 100 = 20.
+    Final Answer: \boxed{20}
+
+    Example (multi-part):
+    Question: Convert 145°F to Celsius [ANS] and Kelvin [ANS].
+    Solution: C = (145-32)×5/9 = 62.777778. K = 62.777778 + 273.15 = 335.927778.
+    Final Answer: \boxed{62.777778, 335.927778}
+
+    Now solve the following problem.
+
+  mcq: |
+    You are an expert mathematician.
+    Reason through the problem once, directly. Do not re-check or restart your calculation. If you catch an error, correct it inline and continue.
+    Verify each step as you go. Do not use "But wait" or restart reasoning after reaching a conclusion. If you have reached an answer, write \boxed{} and stop.
+    Do not rewrite or reformat your solution after reasoning through it. Your reasoning IS your solution — write \boxed{} as soon as you have the answer and stop. Do not produce a separate "clean" write-up.
+    Follow these rules mechanically. Do not reason about them, debate them, or second-guess them. Just apply them.
+    Read the problem carefully and read all answer choices.
+    Break the problem into clear steps.
+    Reason through the answer choices and eliminate wrong choices.
+    Then choose the single best answer.
+
+    RULES:
+    1. You MUST always end your response with your final answer in \boxed{} — never stop before writing it.
+    2. State your final answer as a single letter inside \boxed{}, e.g. \boxed{C}.
+    3. If the problem has multiple MCQ sub-questions, include all letters comma-separated in a single \boxed{}, e.g. \boxed{C, A, B}.
+
+    Example:
+    Question: What is 10 + 17?
+    A. 37
+    B. 10
+    C. 17
+    D. 27
+    Solution: 10 + 17 = 27, so the answer is option D.
+    Final Answer: \boxed{D}
+
+    Now solve the following problem.

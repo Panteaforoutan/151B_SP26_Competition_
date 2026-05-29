@@ -1,8 +1,4 @@
 import os
-os.environ["VLLM_USE_V1"] = "0"
-os.environ["VLLM_ATTENTION_BACKEND"] = "XFORMERS"
-os.environ["VLLM_USE_FLASHINFER_SAMPLER"] = "0"
-
 import argparse
 import yaml
 import json
@@ -106,6 +102,14 @@ def main():
         seed=cfg.get("eval_subset_seed", 42),
     )
 
+    filter_ids_path = cfg.get("filter_ids_path", None)
+    if filter_ids_path:
+        with open(filter_ids_path, "r") as f:
+            filter_data = json.load(f)
+        filter_ids = {item["id"] for item in filter_data}
+        eval_data = [ex for ex in eval_data if ex["id"] in filter_ids]
+        print(f"Filtering to {len(eval_data)} examples from {filter_ids_path}")
+
     output_path = cfg["output_path"]
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
@@ -128,9 +132,8 @@ def main():
         dtype="float16",
         max_model_len=cfg["max_model_len"],
         gpu_memory_utilization=cfg["gpu_memory_utilization"],
-        max_num_seqs=1,
         max_num_batched_tokens=cfg.get("max_num_batched_tokens", 2048),
-        enforce_eager=cfg["enforce_eager"],
+        enforce_eager=False,
         seed=cfg.get("seed", 42)
     )
     

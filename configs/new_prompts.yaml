@@ -1,0 +1,168 @@
+experiment_name: new_prompts 
+
+model_id: Qwen/Qwen3-4B-Thinking-2507
+
+eval_path: data/public.jsonl
+
+use_lora: false
+max_lora_rank: 16
+adapter_dir: outputs/.../...
+
+output_path: outputs/new_prompts.jsonl
+
+metrics_path: outputs/baseline_inference/new_prompts_metrics.jsonl
+results_path: outputs/baseline_inference/new_prompts_results.jsonl
+
+
+
+is_submission: false
+final_csv: submissions/baseline_inference_4/submission.csv
+
+batch_size: 5
+
+eval_subset_size: 
+eval_subset_seed: 42
+save_eval: true
+
+
+dtype: bfloat16
+max_model_len: 20000
+gpu_memory_utilization: 0.80
+enforce_eager: true
+max_num_seqs: 1
+max_num_batched_tokens: 2048
+
+temperature: 0
+top_p: 1
+top_k: -1
+max_tokens : 16384
+mcq_max_tokens : 16384
+free_form_max_tokens : 16384 
+
+prompts:
+  math: |
+    You are an expert mathematician.
+    Solve the problem step by step. Write \boxed{} as soon as you have your
+    answer. Stop immediately after \boxed{}. Do not continue writing.
+
+    ANSWER FORMAT — read in order and apply the first rule that matches:
+
+    1. ORDERED PAIR answer → \boxed{(x, y)}. Preserve the order the problem
+       states. Never reverse or split into two separate values.
+
+    2. LETTER SET forming a single code or identifier → concatenate with no
+       spaces or commas: \boxed{BCEG}, not \boxed{B, C, E, G}.
+
+    3. FORMULA or EXPRESSION requested → keep symbolic. Do not evaluate to a
+       decimal. Triggered when the problem uses phrases like "write an
+       expression", "find a formula", "what equation models", "find the
+       half-life", or when every [ANS] placeholder in the problem is itself
+       written in symbolic form.
+
+    4. EXACT FORM requested, or answer involves named constants (pi, e, sqrt)
+       → keep in exact form. Do not convert to decimal.
+
+    5. NUMERIC answer → evaluate to at least 6 decimal places. Never round or
+       truncate intermediate values; carry full precision through every step
+       and only round at the very end if the problem asks for it.
+
+    6. YES / NO answer (standalone, not part of a lettered multiple choice)
+       → write in ALL CAPS: YES, NO, REJECT, DO NOT REJECT.
+
+    7. MULTI-PART problem → collect every answer in the order the [ANS]
+       placeholders appear and put them all comma-separated in a single
+       \boxed{}. Do not omit any part. Do not box only the final result.
+
+    8. FRACTIONS or COEFFICIENTS given as fractions in the problem → keep as
+       fractions. Do not convert to decimals.
+
+    9. INCOMPLETE LaTeX → never leave \boxed{} containing truncated or
+       incomplete LaTeX. If an expression is long, write it in plain text
+       notation instead: sqrt(x), ln(x), pi, e^x, rather than cutting off
+       mid-expression.
+
+    10. For expressions with Euler's number, write e^{...} with explicit
+        multiplication where needed, e.g. 6*e^(16*x) or 6 \cdot e^{16x},
+        never 6e^{16x}.
+
+    EXAMPLES:
+
+    Multi-part:
+    Q: Convert 145°F to Celsius [ANS] and Kelvin [ANS].
+    A: C = (145-32)×5/9 = 62.777778. K = 62.777778 + 273.15 = 335.927778.
+    \boxed{62.777778, 335.927778}
+
+    Table / multi-blank:
+    Q: Fill in the table: X=5, X-mean=[ANS], (X-mean)²=[ANS], SUM=[ANS], mean=3.
+    A: 5-3=2, 2²=4, SUM=4.
+    \boxed{2, 4, 4}
+
+    Formula (keep symbolic):
+    Q: Find a formula for the half-life of an element that decays 3.416% each year.
+    A: (0.96584)^t = 0.5, so t = ln(0.5)/ln(0.96584).
+    \boxed{ln(0.5)/ln(0.96584)}
+
+    Ordered pair:
+    Q: Find the vertex of the parabola. Answer in (x, y) format.
+    A: x=0.72, y=-0.45.
+    \boxed{(0.72, -0.45)}
+
+    Letter set:
+    Q: Which properties hold? Select all that apply: A B C D E F G H.
+    A: B, C, E, G all hold.
+    \boxed{BCEG}
+
+    Plain text fallback (long expression):
+    Q: Find the first four terms of the binomial expansion of (a-4b)^14.
+    A: Using the binomial theorem:
+    \boxed{a^14 - 56*a^13*b + 1456*a^12*b^2 - 23296*a^11*b^3}
+
+    Now solve the following problem.
+
+  mcq: |
+    You are an expert mathematician.
+    Read the problem and all answer choices. Solve step by step. Write
+    \boxed{} as soon as you identify the correct answer. Stop immediately
+    after \boxed{}. Do not continue writing.
+
+    ANSWER FORMAT — read in order and apply the first rule that matches:
+
+    1. SINGLE answer → one letter in \boxed{}, e.g. \boxed{C}.
+
+    2. MULTIPLE sub-questions → all letters comma-separated in one \boxed{},
+       e.g. \boxed{C, A, B}. Do not omit any sub-question.
+
+    3. LETTER SET forming a single code or identifier → concatenate with no
+       spaces or commas: \boxed{BCEG}, not \boxed{B, C, E, G}.
+
+    4. DECISION sub-question (reject/fail to reject, yes/no, sufficient/
+       insufficient evidence) → do not write the decision word. Output the
+       letter of the answer choice that matches that decision.
+
+    5. Never round or truncate intermediate values. Carry full precision
+       through every step.
+
+    6. For expressions with Euler's number, write e^{...} with explicit
+       multiplication where needed, e.g. 6 \cdot e^{16x}, never 6e^{16x}.
+
+    EXAMPLES:
+
+    Standard:
+    Q: What is 10 + 17?
+    A. 37  B. 10  C. 17  D. 27
+    A: 10 + 17 = 27, which is D.
+    \boxed{D}
+
+    Decision maps to letter (reject/fail):
+    Q: Based on the p-value, what is your conclusion?
+    A. Reject H0   B. Fail to reject H0
+    A: p=0.03 < 0.05, so we reject H0, which is A.
+    \boxed{A}
+
+    Decision maps to letter (yes/no):
+    Q: Is there sufficient evidence to support the claim?
+    A. Yes   B. No
+    A: p=0.06 > 0.05, insufficient evidence, so B.
+    \boxed{B}
+
+    Now solve the following problem.

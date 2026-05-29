@@ -1,0 +1,32 @@
+
+train : 
+python scripts/train_lora.py --config configs/exp07_curated_target_sft.yaml 2>&1 | tee outputs/exp07_curated_target_sft.log
+
+generate responses:
+python scripts/generate_responses.py --config configs/private_inference3.yaml 2>&1 | tee outputs/private_inference3.log
+
+evaluate : 
+python scripts/evaluate_responses.py --config configs/cons_prompts4.yaml
+
+
+tmux new -s train
+tmux attach -t train
+
+source /scratch/.venv/bin/activate
+
+
+python scripts/extract_incorrect_examples.py \
+  --results outputs/baseline_inference/cons_prompts_results.jsonl \
+  --public data/public.jsonl \
+  --output outputs/baseline_inference/cons_prompts.json
+
+python scripts/extract_incorrect_examples.py \
+  --results outputs/baseline_inference/cons_prompts_results.jsonl \
+  --public data/public.jsonl \
+  --output outputs/baseline_inference/incorrect_cons_prompts.json
+
+
+
+python scripts/generate_responses.py --config configs/private_inference3.yaml  2>&1 | tee outputs/private_inference3.log
+
+python scripts/evaluate_responses.py --config configs/private_inference3.yaml
