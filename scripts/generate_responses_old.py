@@ -81,7 +81,7 @@ def make_sampling_params(item, cfg):
         temperature=cfg.get("temperature", 0),
         top_p=cfg.get("top_p", 1.0),
         top_k=cfg.get("top_k", -1),
-        n=cfg.get("n"),
+        n=cfg.get("n", 1),
         max_tokens=cfg["max_tokens"],
         repetition_penalty=cfg.get("repetition_penalty", 1.0),
         seed=cfg.get("seed", 42),
