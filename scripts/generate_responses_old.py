@@ -216,14 +216,15 @@ def main():
         
         with open(output_path, "a") as f:
             for ex, out in zip(batch, outputs):
-                samples = [o.text.strip() for o in out.outputs]   # ALL n samples
+                response = out.outputs[0].text.strip()
+
                 row = {
-                    "id":     ex["id"],
-                    "is_mcq": is_mcq(ex),
-                    "n_ans":  max(ex["question"].count("[ANS]"), 1),  # answer-slot count
-                    "samples": samples,
+                    "id": ex["id"],
+                    "response": response,
                 }
+
                 f.write(json.dumps(row) + "\n")
+
             f.flush()
             os.fsync(f.fileno())
 

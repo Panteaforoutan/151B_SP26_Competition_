@@ -1,26 +1,18 @@
-experiment_name: cons_prompts3_on_public
-# entirely new prompts 
+experiment_name: best_greedy
+
 model_id: Qwen/Qwen3-4B-Thinking-2507
 
-eval_path: data/public.jsonl
+eval_path: data/private.jsonl
 
-use_lora: false
-max_lora_rank: 16
-adapter_dir: outputs/.../...
+output_path: outputs/final/best_greedy.jsonl
 
-output_path: outputs/cons_prompts3_on_public.jsonl
 
-metrics_path: outputs/baseline_inference/cons_prompts3_on_public_metrics.jsonl
-results_path: outputs/baseline_inference/cons_prompts3_on_public_results.jsonl
+is_submission: true
+final_csv: submissions/final/best_greedy.csv
 
-is_submission: false
-final_csv: submissions/baseline_inference_4/submission.csv
+batch_size: 64 
 
-batch_size: 5
-
-eval_subset_size: 
 eval_subset_seed: 42
-save_eval: true
 
 
 dtype: bfloat16
@@ -46,22 +38,24 @@ prompts:
     not a virtue. Trust your first complete solution.
     
     RULES:
-    1. BEFORE you begin solving: count how many [ANS] blanks or parts exist and write that number to yourself. Then solve. The moment you have a candidate answer for all parts — even if you are not fully confident — write \boxed{} and stop. Spending more tokens re-checking after a complete solution is a mistake. If you are still reasoning after 3000 words, you must stop immediately and commit to your best answer in \boxed{}.
+    1. Write \boxed{} as soon as you have your answer. Do not continue after.
     2. If the problem has multiple parts, put all answers comma-separated in a single \boxed{}, e.g. \boxed{3, 7}. Do not omit any part. Exception: if the answer is a set of letters forming a single code or identifier, concatenate them without separators (see Rule 11).
-    3. For decimal answers, keep at least 6 digits after the decimal point.
-    4. Unless asked for exact form, evaluate to decimal with 6+ decimal places.
-    5. For expressions with Euler's number, write exp(...) with explicit multiplication: 77.2*exp(0.016*t) not 77.2*e^(0.016*t) and never 77.2e^{0.016t}. Always use * for multiplication inside exp().
+    3. For decimal answers, always give exactly 6 digits after the decimal point, regardless of what the problem says about rounding. If the problem says "round to 2 decimal places", still give 6 decimal places. WRONG: \boxed{2.30}, \boxed{12.08}. RIGHT: \boxed{2.289200}, \boxed{12.081400}. Exception: if the answer is a whole number (no fractional part), write it without any decimal point. Rule 9 takes precedence: if the answer should be a formula, do NOT evaluate to a decimal.
+    4. Unless asked for exact form, evaluate to decimal with 6 decimal places.
+    5. For expressions with Euler's number, write exp(...) with explicit multiplication: 77.2*exp(0.016*t) not 77.2*e^(0.016*t). Always use * for multiplication inside exp().
     6. For yes/no answers, write in ALL CAPS: YES, NO, REJECT, DO NOT REJECT.
-    6b. Never output two decision words for the same blank. If a blank asks for Yes/No AND a separate blank asks for Reject/Do Not Reject, they are separate answers occupying separate positions in \boxed{}. Do not combine them into a single position.
-    7. If the problem requires filling in multiple blanks, values, or table cells, collect every answer in the order they appear in the problem and put them all comma-separated in a single \boxed{}. Do not only box the final result — every [ANS] placeholder must have a corresponding value in the \boxed{}.
+    6b. Never output two decision words for the same blank. If a blank asks for YES/NO and a separate blank asks for REJECT/DO NOT REJECT, those are separate positions in \boxed{}. Do not combine a yes/no answer and a reject/do-not-reject answer into a single position.
+    7. If the problem requires filling in multiple blanks, values, or table cells, first count the number of [ANS] placeholders, then collect every answer in the order they appear and put them all comma-separated in a single \boxed{}. Your \boxed{} must contain exactly as many values as there are [ANS] placeholders — no more, no fewer.
     8. Never round or truncate intermediate values during multi-step calculations. Carry full precision through every step and only round the final answer if the problem asks for a rounded value.
-    9. If the problem asks you to leave an answer as a formula or expression (e.g. uses phrases like "write an expression", "find a formula", "what equation models", or "find the half-life formula"), OR if the answer choices or blank placeholders are themselves written in symbolic/formula form, do NOT evaluate to a decimal. Mirror the form of the expected answer.
-    9b. If any blank or part of the question asks you to "write an equation", "set up an expression", or asks for A and B in a formula of the form A/B, your answer must be symbolic/algebraic — never substitute numbers for variables. Only evaluate to decimal when the problem explicitly asks for a numerical result.
-    10. If the ground truth is a coordinate pair or set of values grouped as a single answer (e.g. "the zeros are x = [ANS]" where multiple values fill ONE blank), write them as a tuple: \boxed{(2, -2)}, not \boxed{2, -2}. A single [ANS] placeholder = one tuple, even if the problem says "separate by commas".
+    9. If the problem asks you to leave an answer as a formula or expression (e.g. uses phrases like "write an expression", "find a formula", "what equation models", "simplify to the form A/B"), OR if the answer choices or blank placeholders are themselves written in symbolic/formula form, do NOT evaluate to a decimal. Mirror the form of the expected answer. Rule 9 overrides Rules 3 and 4.
+    10. If the answer is a coordinate pair or ordered pair, preserve the order given by the problem and write it as a tuple: \boxed{(x, y)}. Do not reverse the order or list them as two separate values.
     11. If the answer is a set of letters or codes that form a single identifier (e.g. the problem expects "BCEG"), write them concatenated as one string with no spaces or commas: \boxed{BCEG}, not \boxed{B, C, E, G}.
+    11b. Mirror the exact format used in the answer choices or blanks. If the choices use single-letter abbreviations (e.g. N, O, I, R), output those abbreviations — do not spell out the full word.
     12. If the problem asks for an angle or value "in exact form" or in terms of a named constant (pi, e, sqrt, etc.), keep that form rather than converting to a decimal.
     13. If the problem asks for coefficients or constants as fractions (e.g. 32/8), keep them as fractions rather than converting to decimals.
-    14. NEVER use LaTeX inside \boxed{}. This includes \infty, \lceil, \frac, \sqrt, \cdot, and ALL backslash commands. Plain-text equivalents: \infty → infinity, \frac{a}{b} → (a)/(b), \sqrt{x} → sqrt(x), \cdot → *, \lceil x \rceil → ceil(x)
+    14. NEVER use any LaTeX backslash command inside \boxed{}. This includes \infty, \sqrt, \frac, \dfrac, \cdot, \lceil, \rceil, and every other \command. Use plain-text equivalents only: \infty → infinity, \sqrt{x} → sqrt(x), \frac{a}{b} → (a)/(b), \cdot → *, \lceil x \rceil → ceil(x), e^{f(x)} → exp(f(x)). Plain text is mandatory, not a fallback.
+    15. If the problem contains inline answer choices in the format "A. ... B. ... C. ..." (even within a math problem), it is a multiple choice question. Write only the letter of the correct answer in \boxed{}, e.g. \boxed{A}. Never write the computed numerical value.
+    16. For sample size calculations, do NOT round up to the nearest integer. Give the raw unrounded decimal result with 6 decimal places. The grader requires the exact unrounded value.
 
     Example (multi-part):
     Question: Convert 145°F to Celsius [ANS] and Kelvin [ANS].
@@ -90,16 +84,22 @@ prompts:
     Solution: B, C, E, G all hold.
     \boxed{BCEG}
 
-    Example (plain text (required) for long expression):
+    Example (plain text, required):
     Question: Find the first four terms of the binomial expansion of (a-4b)^14.
     Solution: Using the binomial theorem:
     \boxed{a^14 - 56*a^13*b + 1456*a^12*b^2 - 23296*a^11*b^3}
 
-    Example (formula parts):
-    Question: Simplify R = S + TW/(T+W) to the form A/B. A=[ANS] B=[ANS]. 
-    Then given S=27, T=64, W=95, find R. [ANS]
-    Solution: A = ST+SW+TW, B = T+W. Then R = (27*64+27*95+64*95)/(64+95) = 65.239094.
+    Example (symbolic A/B form):
+    Question: Simplify R = S + TW/(T+W) to the form A/B. A=[ANS] B=[ANS].
+    Then given S=27, T=64, W=95, find R=[ANS].
+    Solution: A = ST+SW+TW, B = T+W. R = (27*64+27*95+64*95)/(64+95) = 65.239094.
     \boxed{ST+SW+TW, T+W, 65.239094}
+
+    Example (inline MCQ in math problem):
+    Question: How many megabits can a 56 Mbps connection receive in 1 minute? [ANS]
+    A. 3360  B. 5640  C. 5600  D. 3260
+    Solution: 56 * 60 = 3360, which is answer A.
+    \boxed{A}
 
     Now solve the following problem.
 
@@ -111,14 +111,12 @@ prompts:
     is a mistake, not a virtue. Trust your first complete solution.
 
     RULES:
-    1. BEFORE you begin solving: count how many [ANS] blanks or parts exist and write that number to yourself. Then solve. The moment you have a candidate answer for all parts — even if you are not fully confident — write \boxed{} and stop. Spending more tokens re-checking after a complete solution is a mistake. If you are still reasoning after 3000 words, you must stop immediately and commit to your best answer in \boxed{}.
+    1. Write \boxed{} as soon as you have your answer. Do not continue after.
     2. State your final answer as a single letter inside \boxed{}, e.g. \boxed{C}.
     3. Multiple sub-questions: comma-separated in one \boxed{}, e.g. \boxed{C, A, B}.
     4. For expressions with Euler's number, write \exp(...) or use e^{...} with explicit multiplication, e.g. 6 \cdot e^{16x} not 6e^{16x}.
     5. Never round or truncate intermediate values during multi-step calculations. Carry full precision through every step.
     6. If a sub-question asks for a decision (reject/do not reject, yes/no, sufficient/insufficient evidence) rather than a letter choice, output the letter of the answer choice that matches that decision, not the decision word itself.
-    7. NEVER use LaTeX inside \boxed{}. Always write plain-text notation: e^(16x) not e^{16x}, sqrt(x) not \sqrt{x}, pi not \pi, ln(x) not \ln(x), (a+b)/c not \frac{a}{b}. Plain text is mandatory — not a fallback.
-    8. If the problem contains answer choices in the format "A. ... B. ... C. ...", it is a multiple choice question. Select the letter of the correct answer and write only that letter in \boxed{}, e.g. \boxed{A}. Never write the numerical value of an MCQ answer.
 
     Example:
     Question: What is 10 + 17?

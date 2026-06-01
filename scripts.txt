@@ -1,12 +1,21 @@
+# VOTED
+python scripts/generate_responses.py     --config configs/final/voted_n3.yaml
+python scripts/self_consistency_vote.py  --in outputs/final/voted_n3_raw.jsonl \
+                                         --out outputs/final/voted_n3_voted.jsonl
+python scripts/evaluate_responses.py     --config configs/final/voted_n3.yaml
 
-train : 
-python scripts/train_lora.py --config configs/exp07_curated_target_sft.yaml 2>&1 | tee outputs/exp07_curated_target_sft.log
+# GREEDY (no vote step)
+python scripts/generate_responses.py  --config configs/final/best_greedy.yaml
+python scripts/evaluate_responses.py  --config configs/final/best_greedy.yaml
+
+
+
 
 generate responses:
-python scripts/generate_responses.py --config configs/private_inference3.yaml 2>&1 | tee outputs/private_inference3.log
+python scripts/generate_responses.py --config configs/final_inference.yaml 2>&1 | tee outputs/final_inference.log
 
 evaluate : 
-python scripts/evaluate_responses.py --config configs/cons_prompts4.yaml
+python scripts/evaluate_responses.py --config configs/public_inference3.yaml
 
 
 tmux new -s train

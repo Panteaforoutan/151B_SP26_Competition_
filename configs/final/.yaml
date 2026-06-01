@@ -1,0 +1,84 @@
+experiment_name: final_inference 
+
+model_id: Qwen/Qwen3-4B-Thinking-2507
+
+eval_path: data/private.jsonl
+
+output_path: outputs/final_inference.jsonl
+voted_path:  outputs/final_inference_voted.jsonl 
+
+metrics_path: outputs/baseline_inference/final_inference_4_metrics.jsonl
+results_path: outputs/baseline_inference/final_inference_results.jsonl
+
+is_submission: true
+final_csv: submissions/final_submission.csv
+
+batch_size: 64
+
+eval_subset_seed: 42
+save_eval: true
+
+
+dtype: bfloat16
+max_model_len: 20000
+gpu_memory_utilization: 0.80
+enforce_eager: false
+max_num_seqs: 1
+max_num_batched_tokens: 8192
+
+temperature: 0.6
+top_p: 0.95
+top_k: 20
+n: 3
+max_tokens : 16384
+mcq_max_tokens : 16384
+free_form_max_tokens : 16384 
+
+prompts:
+  math: |
+    You are an expert mathematician. 
+    Solve the problem step by step. When you arrive at an answer, write 
+    \boxed{} immediately. A correct solution reaches \boxed{} quickly — 
+    re-checking and second-guessing after finding an answer is a mistake, 
+    not a virtue. Trust your first complete solution.
+    
+    RULES:
+    1. Write \boxed{} as soon as you have your answer. Do not continue after.
+    2. If the problem has multiple parts, put all answers comma-separated in a single \boxed{}, e.g. \boxed{3, 7}. Do not omit any part.
+    3. For decimal answers, keep at least 6 digits after the decimal point.
+    4. Unless asked for exact form, evaluate to decimal with 6+ decimal places.
+    5. For expressions with Euler's number, write \exp(...) or use e^{...} with explicit multiplication, e.g. 6 \cdot e^{16x} not 6e^{16x}.
+    6. For yes/no answers, write in ALL CAPS: YES, NO, REJECT, DO NOT REJECT.
+
+    Example:
+    Question: What is 20% of 100?
+    Solution: 20% of 100 = 0.20 × 100 = 20.
+    \boxed{20}
+
+    Example (multi-part):
+    Question: Convert 145°F to Celsius [ANS] and Kelvin [ANS].
+    Solution: C = (145-32)×5/9 = 62.777778. K = 62.777778 + 273.15 = 335.927778.
+    Final Answer: \boxed{62.777778, 335.927778}
+
+    Now solve the following problem.
+
+  mcq: |
+    You are an expert mathematician.
+    Read the problem and all answer choices. Solve step by step. When you 
+    identify the correct answer, write \boxed{} immediately. A correct 
+    solution reaches \boxed{} quickly — re-checking after finding an answer 
+    is a mistake, not a virtue. Trust your first complete solution.
+
+    RULES:
+    1. Write \boxed{} as soon as you have your answer. Do not continue after.
+    2. State your final answer as a single letter inside \boxed{}, e.g. \boxed{C}.
+    3. Multiple sub-questions: comma-separated in one \boxed{}, e.g. \boxed{C, A, B}.
+    4. For expressions with Euler's number, write \exp(...) or use e^{...} with explicit multiplication, e.g. 6 \cdot e^{16x} not 6e^{16x}.
+
+    Example:
+    Question: What is 10 + 17?
+    A. 37  B. 10  C. 17  D. 27
+    Solution: 10 + 17 = 27, so D.
+    \boxed{D}
+
+    Now solve the following problem.

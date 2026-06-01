@@ -109,13 +109,12 @@ def main():
     cfg = load_config(args.config)
 
     eval_data = load_jsonl(cfg["eval_path"])
-    generated_rows = load_jsonl(cfg["output_path"])
+    input_path = cfg.get("voted_path", cfg["output_path"])
+    generated_rows = load_jsonl(input_path)
 
-    responses_by_id = {
-        row["id"]: row["response"]
-        for row in generated_rows
-    }
+    responses_by_id = {row["id"]: row["response"] for row in generated_rows}
 
+    
     print(f"Loaded {len(responses_by_id)} generated responses.")
     print(f"Eval set has {len(eval_data)} examples.")
 
@@ -202,7 +201,8 @@ def main():
     metrics = {
         "experiment_name": cfg.get("experiment_name"),
         "eval_path": cfg.get("eval_path"),
-        "output_path": cfg.get("output_path"),
+        # "output_path": cfg.get("output_path"),
+        "output_path": cfg.get("voted_path", cfg["output_path"]),
         "adapter_dir": cfg.get("adapter_dir"),
         "max_tokens": cfg.get("max_tokens"),
         "generated_count": len(results),

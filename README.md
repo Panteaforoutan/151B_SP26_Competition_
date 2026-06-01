@@ -1,15 +1,28 @@
-# CSE 151B Competition — Starter Code
+# CSE 151B Competition — Qwen3-4B Math
 
-Open **`starter_code_cse151b_comp.ipynb`** to get started.
+## Hardware & runtime
+- GPU: UCSD DSMLP pod, NVIDIA A30
+- Approx. inference time: ~6-7 h for the full private set
+  (n=3 samples/question, self-consistency voting).
+  Note: if generated samples already exist in `outputs/`, the pipeline
+  skips generation and reproduces the submission in minutes.
 
-The notebook covers environment setup, inference with Qwen3-4B-Thinking (INT8), and scoring against the public dataset.
+## Setup
+```bash
+git clone https://github.com/Panteaforoutan/151B_SP26_Competition.git && cd 151B_SP26_Competition
+./setup.sh                              # installs dependencies
+source /scratch/.venv/bin/activate      # activate the environment
+```
 
-## Contents
+## Model weights
+Base model `Qwen/Qwen3-4B-Thinking-2507` is downloaded automatically from
+Hugging Face on first run by vLLM — no manual download and no LoRA adapter
+needed. The final pipeline is the base model; there are no fine-tuned weights to load.
 
-| File | Description |
-|---|---|
-| `starter_code_cse151b_comp.ipynb` | Main entry point |
-| `judger.py` | Response scoring logic |
-| `utils.py` | Utilities used by `judger.py` |
-| `data/public.jsonl` | Public dataset with ground-truth answers |
-| `results/` | Output JSONL files written at runtime |
+## Reproduce results
+```bash
+python scripts/run_inference.py
+```
+This runs the full pipeline end-to-end:
+generate samples → self-consistency majority vote → evaluate → writes the
+submission CSV to `submissions/final/best_greedy.csv`.
