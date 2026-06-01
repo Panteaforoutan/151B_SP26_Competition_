@@ -3,9 +3,6 @@
 ## Hardware & runtime
 - GPU: UCSD DSMLP pod, NVIDIA A30
 - Approx. inference time: ~6-7 h for the full private set
-  (n=3 samples/question, self-consistency voting).
-  Note: if generated samples already exist in `outputs/`, the pipeline
-  skips generation and reproduces the submission in minutes.
 
 ## Setup
 ```bash
