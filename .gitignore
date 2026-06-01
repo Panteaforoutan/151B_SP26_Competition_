@@ -14,3 +14,4 @@ checkpoint-*/
 # Jupyter auto checkpoints
 .ipynb_checkpoints/
 */.ipynb_checkpoints/
+.ipynb_checkpoints/
